@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxyservice-configmap
+data:
+  # here I just need to paste name of the service that is exposing given deployment.
+  #update it's not working because my minikube does not have installed kube-dns
+  #base_url: internalservice-service
+  val_from_configmap: randomString

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: internalservice-deployment
+  labels:
+    app: internalservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: internalservicepod
+  template:
+    metadata:
+      labels:
+        app: internalservicepod
+    spec:
+      containers:
+        - name: internalservicecontainer
+          image: trueh3/internalservice:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SECRET_VAL
+              valueFrom:
+                secretKeyRef:
+                  name: internalservice-secret
+                  key: secret-val

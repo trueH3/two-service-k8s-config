@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxyservice-service
+spec:
+  selector:
+    # thanks to selector service will be assigned to all pods with given label
+    app: proxyservicepod
+  #This is needed to make external service accessible outside the cluster
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      #this is external port and this is used to get inside the cluster it has to be from range 30000 - 32767
+      nodePort: 30000

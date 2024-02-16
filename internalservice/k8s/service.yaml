@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: internalservice-service
+spec:
+  selector:
+    # thanks to selector service will be assigned to all pods with given label
+    app: internalservicepod
+  ports:
+    - name: http
+      protocol: TCP
+      #this is port that will be assigned to pod for that will be used for inside cluster communication
+      port: 8081
+      #this is port inside docker container
+      targetPort: 8081

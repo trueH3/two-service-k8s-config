@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxyservice-deployment
+  labels:
+    app: proxyservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxyservicepod
+  template:
+    metadata:
+      labels:
+        app: proxyservicepod
+    spec:
+      containers:
+        - name: proxyservicecontainer
+          image: trueh3/proxyservice:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VAL_FROM_CONFIGMAP
+              valueFrom:
+                configMapKeyRef:
+                  # name given to configmap
+                  name: proxyservice-configmap
+                  key: val_from_configmap
