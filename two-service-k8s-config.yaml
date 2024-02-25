@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: internalservice-deployment
+  labels:
+    app: internalservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: internalservicepod
+  template:
+    metadata:
+      labels:
+        app: internalservicepod
+    spec:
+      containers:
+        - name: internalservicecontainer
+          image: trueh3/internalservice:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SECRET_VAL
+              valueFrom:
+                secretKeyRef:
+                  name: internalservice-secret
+                  key: secret-val
+
+---
+
+#In real world i would not store secret inside project but in different remote location
+apiVersion: v1
+kind: Secret
+metadata:
+  name: internalservice-secret
+# opaque is default for key-value pairs
+type: Opaque
+data:
+  #It has to be base64 encoded
+  secret-val: c3VwZXJTZWNyZXQ=
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: internalservice-service
+spec:
+  selector:
+    # thanks to selector service will be assigned to all pods with given label
+    app: internalservicepod
+  ports:
+    - name: http
+      protocol: TCP
+      #this is port that will be assigned to pod for that will be used for inside cluster communication
+      port: 8081
+      #this is port inside docker container
+      targetPort: 8081
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxyservice-deployment
+  labels:
+    app: proxyservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxyservicepod
+  template:
+    metadata:
+      labels:
+        app: proxyservicepod
+    spec:
+      containers:
+        - name: proxyservicecontainer
+          image: trueh3/proxyservice:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VAL_FROM_CONFIGMAP
+              valueFrom:
+                configMapKeyRef:
+                  # name given to configmap
+                  name: proxyservice-configmap
+                  key: val_from_configmap
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxyservice-service
+spec:
+  selector:
+    # thanks to selector service will be assigned to all pods with given label
+    app: proxyservicepod
+  #This is needed to make external service accessible outside the cluster
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      #this is external port and this is used to get inside the cluster it has to be from range 30000 - 32767
+      nodePort: 30000
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxyservice-configmap
+data:
+  # here I just need to paste name of the service that is exposing given deployment.
+  #update it's not working because my minikube does not have installed kube-dns
+  #base_url: internalservice-service
+  val_from_configmap: randomString
