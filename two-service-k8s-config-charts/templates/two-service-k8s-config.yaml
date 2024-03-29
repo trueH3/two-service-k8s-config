@@ -88,7 +88,7 @@ spec:
                   name: proxyservice-configmap
                   key: val_from_configmap
             - name: INTERNAL_SERVICE_URL
-              value: internalservice-service.default.svc.cluster.local:8081
+              value: http://internalservice-service.default.svc.cluster.local:8081
 
 ---
 
