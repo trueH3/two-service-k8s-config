@@ -21,11 +21,8 @@ public class WelcomeController {
     @GetMapping("/test")
     public String getHello() throws URISyntaxException {
         log.info("in proxy controller");
-        // please visit application.properties for the explanation for this replace
-        final var formattedUrl = baseUrl.replace("tcp", "http");
-        log.info("formated url:" + formattedUrl);
         final var restTemplate = new RestTemplate();
-        final var responseFromInternalController = restTemplate.getForObject(new URI(formattedUrl + "/internal/test"), String.class);
+        final var responseFromInternalController = restTemplate.getForObject(new URI(baseUrl + "/internal/test"), String.class);
 
         return responseFromInternalController + valFromCm;
     }
